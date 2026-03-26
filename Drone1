@@ -2,15 +2,36 @@ from pymavlink import mavutil
 import time
 import math
 
-#Switch into guided mode for AI reactions, use atuo mode for mission navigation with five waypoints iwth five different interference obstacles
+#[Start Up]----------------------------------------------------------------------------------------------------------------------------------
 
-# Connect to MAVProxy/SITL
-# Common SITL endpoint:
-connection = mavutil.mavlink_connection('udp:127.0.0.1:14550')
+    # (venv-ardupilot) joeyehardiman@K3PRO:/mnt/c/Users/Kids Computer Left$ sim_vehicle.py -v ArduCopter (maybe "--out" or "output add 127.0.0.1:14550)" to ensure it outputs to the correct port(start ArduPilot SITL)
+    # PS C:\Users\Kids Computer Left\Desktop\PythonDirectory\ASU_Projects\AS> python Drone1.py (run Pythpn script)
+    # requires Linux Virtual Enviroment (Ubuntu) and ArduPilot software
+#[Theory of Operation]----------------------------------------------------------------------------------------------------------------------------------
 
-# Wait until ArduPilot is able to communicate
-connection.wait_heartbeat()
+    #Switch into guided mode for AI reactions, use atuo mode for mission navigation with five waypoints iwth five different interference obstacles
+
+#[Modifications]----------------------------------------------------------------------------------------------------------------------------------
+
+    #C:\Users\your_username\AppData\Local\MAVProxy is the MAVproxy location whci allows for start up instructions , put output add 127.0.0.1:14550 so it always outputs to the same port the scripot is listening for
+    #mkdir "$env:LOCALAPPDATA\MAVProxy"
+    #'output add 127.0.0.1:14550' | Out-File -Encoding ascii "$env:LOCALAPPDATA\MAVProxy\.mavinit.scr"
+
+#[Set Up Connection]----------------------------------------------------------------------------------------------------------------------------------
+
+connection = mavutil.mavlink_connection('udpin:0.0.0.0:14550')# Connect to MAVProxy/SITL, Common SITL endpoint:
+connection.wait_heartbeat() # Wait until ArduPilot is able to communicate
 print(f"Connected to system {connection.target_system}, component {connection.target_component}")
+
+#[Helper Functions For Flight Control]----------------------------------------------------------------------------------------------------------------------------------
+
+# Following functions follow the same format:
+# from the connection send a MAVlinnk message in the form of a command_long_send message
+# specifies which vehicle
+# specifies which part of vehicle to talk to (autopilot in this case)
+# specific command
+# confirmation (usually a 0 not sure why)
+# seven parameters (mostly zeros becuase only a few are typically used)
 
 def set_mode(mode_name: str): # Mathcnes the mode id to the string becuase ArduPilot expects an id not a stirng but humans dont talk in ids
     mode_id = connection.mode_mapping().get(mode_name) #looks at intern mapping of mode ids and their respective names
@@ -22,14 +43,6 @@ def set_mode(mode_name: str): # Mathcnes the mode id to the string becuase ArduP
         mavutil.mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
         mode_id
     )
-
-#Following functions follow the dame format:
-# from the connection send a MAVlinnk message in the form of a command_long_send message
-# specifies which vehicle
-# specifies which part of vehicle to talk to (autopilot in this case)
-# specific command
-# confirmation (usually a 0 not sure why)
-# seven parameters (mostly zeros becuase only a few are typically used)
 
 def arm():
     connection.mav.command_long_send(
@@ -51,7 +64,7 @@ def disarm():
         0, 0, 0, 0, 0, 0
     )
 
-def takeoff(altitude_m: float):
+def takeoff(altitude_m: float): #DONT USE THIS LOWKEY, KINDA JUST HRE IN CASE
     connection.mav.command_long_send(
         connection.target_system,
         connection.target_component,
@@ -71,10 +84,8 @@ def rtl():
     )
 
 def send_body_velocity(vx, vy, vz): # saving this for reactions from AI not so much mission contoll 
-    """
-    Body-frame velocity command.
-    vx forward, vy right, vz down (m/s)
-    """
+    # Body-frame velocity command.
+    # vx forward, vy right, vz down (m/s)
     type_mask = (
         mavutil.mavlink.POSITION_TARGET_TYPEMASK_X_IGNORE |
         mavutil.mavlink.POSITION_TARGET_TYPEMASK_Y_IGNORE |
@@ -98,19 +109,141 @@ def send_body_velocity(vx, vy, vz): # saving this for reactions from AI not so m
         0, 0          # yaw/yaw_rate ignored
     )
 
-# Example sequence
-set_mode("GUIDED")
-time.sleep(2)
+def make_takeoff_item(seq, lat, lon, alt):
+    return mavutil.mavlink.MAVLink_mission_item_int_message( #misson message (integers)
+        connection.target_system,
+        connection.target_component,
+        seq, #which posison in the sequence
+        mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT_INT, # define cordinate system
+        mavutil.mavlink.MAV_CMD_NAV_TAKEOFF,# 
+        0,   # current
+        1,   # autocontinue
+        0, 0, 0, 0,                  # param1-4
+        int(lat * 1e7),              # x = latitude
+        int(lon * 1e7),              # y = longitude
+        alt,                         # z = altitude
+        mavutil.mavlink.MAV_MISSION_TYPE_MISSION
+    )
 
+def make_rtl_item(seq):
+    return mavutil.mavlink.MAVLink_mission_item_int_message(
+        connection.target_system,
+        connection.target_component,
+        seq,
+        mavutil.mavlink.MAV_FRAME_MISSION,
+        mavutil.mavlink.MAV_CMD_NAV_RETURN_TO_LAUNCH,
+        0,   # current
+        1,   # autocontinue
+        0, 0, 0, 0,                  # param1-4
+        0,                           # x unused
+        0,                           # y unused
+        0,                           # z unused
+        mavutil.mavlink.MAV_MISSION_TYPE_MISSION
+    )
+
+def make_waypoint_item(seq, lat, lon, alt): # creates a mission packet to eventually send to the drone
+
+    return mavutil.mavlink.MAVLink_mission_item_int_message( #contrcuts the MAVlink mission object (with integers) 
+        connection.target_system, #finds correct vehicle
+        connection.target_component, #finds correct sytem in that vehicle (would be a id in real life, is this brute forceable?)
+        seq, #specifies which site in the mission order
+        mavutil.mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT_INT, #specifies the cordinate sysetm( lat, lon, alt in integer form)
+        mavutil.mavlink.MAV_CMD_NAV_WAYPOINT, # mission is a "normal" waaypoint navigation command (pther commands could be loiter RTL etc)
+        0,   # current, left at zero becuase this is not the current mission, but will be changed to one
+        1,   # autocontinue once this missin is complete (1 = yes)
+        0, 0, 0, 0,                  # param1-4 not used
+        int(lat * 1e7), #specifed lat
+        int(lon * 1e7), #specifed lon
+        alt, #altitude lol
+        mavutil.mavlink.MAV_MISSION_TYPE_MISSION #says this is waypoint item not a differnt navigations item such as an invisible wall
+    )
+
+# script:
+# “Delete your old mission.”
+# script:
+# “I am about to upload 7 mission items.”
+# Drone:
+# “Okay, send me item 0.”
+# script:
+# “Here is item 0.”
+# Drone:
+# “Now send item 1.”
+# script:
+# “Here is item 1.”
+# Drone:
+# “Now send item 2.”
+# script:
+# “Here is item 2.”
+# ...and so on...
+# Drone:
+# “Upload complete.”
+
+def upload_mission(waypoints):
+    # Clear any previous mission
+    connection.mav.mission_clear_all_send(#hey dorneclear the mission
+        connection.target_system,#tells the right drone
+        connection.target_component,#tells the right drone system(autopilot)
+        mavutil.mavlink.MAV_MISSION_TYPE_MISSION#tells what kind of data needs to be cleared (mission data not other data like an invisible wall)
+    )
+
+    time.sleep(1) #?
+
+    # Tell vehicle how many waypoints are coming
+    connection.mav.mission_count_send(
+        connection.target_system,
+        connection.target_component,
+        len(waypoints),#length of misson vector (how many mission to fly)
+        mavutil.mavlink.MAV_MISSION_TYPE_MISSION#specifies this count refers to the main mision data
+    )
+
+    sent = 0 #counter, every time a misson is complete 1 is added to the counter
+    while True: #keep checking until upload is finished
+        msg = connection.recv_match( # listen for these particular message types so it ignores unrelated messages
+            type=["MISSION_REQUEST_INT", "MISSION_REQUEST", "MISSION_ACK"], #mission number, mission sequence, mision sucesfully uploaded (acknoleged)
+            blocking=True, #waits untill one of these messages is received ?which one
+            timeout=10 #will wait ten seconds for a mission relatted message ?what does the interaction look like, donr to ground control
+        )
+
+        if msg is None: #if there is no response form the drone
+            raise TimeoutError("Mission upload timed out")
+
+        msg_type = msg.get_type() # finds out what type of misson message the drone sent
+
+        if msg_type in ["MISSION_REQUEST_INT", "MISSION_REQUEST"]: #if dorne is requesting a waypoint (sequence and mission)
+            seq = msg.seq #sets teh sequence we are currently on
+            print(f"Vehicle requested mission item {seq}") 
+            connection.mav.send(waypoints[seq]) #sends specific mission using the sequence number the drone requested
+            sent += 1 #now knows I sent whatever number of sent mission plus one so it will ask for the next sequential mission
+
+        elif msg_type == "MISSION_ACK": # if the message type is an ascknolegement of a mission upload
+            print(f"Mission upload complete: type={msg.type}")
+            break # no need to wait the upload is complete
+
+#[Mission Parameters]----------------------------------------------------------------------------------------------------------------------------------
+
+home_lat = -35.363261
+home_lon = 149.165230
+
+mission_waypoints = [
+    make_takeoff_item(0, home_lat, home_lon, 20),
+    make_waypoint_item(1, home_lat + 0.0002, home_lon + 0.0002, 20),
+    make_waypoint_item(2, home_lat + 0.0004, home_lon + 0.0004, 20),
+    make_waypoint_item(3, home_lat + 0.0006, home_lon + 0.0002, 20),
+    make_waypoint_item(4, home_lat + 0.0008, home_lon + 0.0000, 20),
+    make_waypoint_item(5, home_lat + 0.0010, home_lon - 0.0002, 20),
+    make_rtl_item(6)
+]
+
+#[Flight Control]----------------------------------------------------------------------------------------------------------------------------------
+
+upload_mission(mission_waypoints)
+set_mode("AUTO")
+time.sleep(3)
 arm()
 time.sleep(3)
+print("Drone ready for mission")
 
-takeoff(10)
-time.sleep(10)
-
-# Move forward for 3 seconds
-for _ in range(3):
-    send_body_velocity(1.0, 0.0, 0.0)
-    time.sleep(1)
-
-rtl()
+while True: #prints all telemetry data
+    msg = connection.recv_match(type=["HEARTBEAT", "GLOBAL_POSITION_INT"], blocking=True, timeout=1)
+    if msg:
+        print(msg)
