@@ -247,3 +247,377 @@ while True: #prints all telemetry data
     msg = connection.recv_match(type=["HEARTBEAT", "GLOBAL_POSITION_INT"], blocking=True, timeout=1)
     if msg:
         print(msg)
+
+#[Interference Injection]----------------------------------------------------------------------------------------------------------------------------
+#SILT>port 14560>proxy>updated telemetry to port 14550>pymavlink connects to udp 14550
+import socket #allow for UDP network packets
+import threading #scrips can run in the background wiht main loop
+import time
+import random
+import heapq #buids a queue for delayed packets to be delayed
+from dataclasses import dataclass
+from typing import Optional, List
+
+
+@dataclass #random packet loss parameters
+class RandomLossConfig:
+    enabled: bool = False
+    loss_prob: float = 0.0   # 0.05, 0.20, 0.50
+
+
+@dataclass #burst loss parameters
+class BurstLossConfig:
+    enabled: bool = False
+    burst_duration_s: float = 0.0   # 0.1, 0.2, 0.5, 1.0
+    interval_s: float = 5.0         # how often a burst starts
+    next_burst_start: float = 0.0 #uses the interval to find next burst in terms of glabal time, stores timestamp instead of a delta value
+    burst_end: float = 0.0
+
+
+@dataclass
+class LatencyJitterConfig:
+    enabled: bool = False
+    base_latency_s: float = 0.0     # 0.1, 0.2, 0.5
+    jitter_s: float = 0.0           # 0.025, 0.05, 0.2 (random offset)
+
+
+@dataclass #only leets throught some packets, not the drive train throttle
+class ThrottleConfig:
+    enabled: bool = False
+    keep_every_n: int = 1           # 5, 10, 20
+    counter: int = 0
+
+
+@dataclass
+class BlackoutConfig:
+    enabled: bool = False
+    blackout_duration_s: float = 0.0   # 1, 3, 5
+    interval_s: float = 20.0
+    next_blackout_start: float = 0.0 #uses intervas to find actual timestamp to start dropout
+    blackout_end: float = 0.0
+
+
+class DelayQueue:
+    def __init__(self):
+        self.heap: List[tuple] = []
+        self.lock = threading.Lock()
+
+    def push(self, send_time: float, packet: bytes, addr):
+        with self.lock:
+            heapq.heappush(self.heap, (send_time, packet, addr))
+
+    def pop_ready(self, now: float):
+        ready = []
+        with self.lock:
+            while self.heap and self.heap[0][0] <= now:
+                ready.append(heapq.heappop(self.heap))
+        return ready
+
+
+class UDPInterferenceProxy:
+    """
+    Forwards UDP packets from source -> destination while injecting impairments.
+
+    Typical use for SITL:
+      ArduPilot/MAVProxy sends MAVLink UDP to proxy listen port
+      proxy forwards to pymavlink receiver port
+    """
+
+    def __init__(
+        self,
+        listen_host: str,
+        listen_port: int,
+        forward_host: str,
+        forward_port: int,
+    ):
+        self.listen_addr = (listen_host, listen_port)
+        self.forward_addr = (forward_host, forward_port)
+
+        self.sock_in = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock_in.bind(self.listen_addr)
+        self.sock_in.settimeout(0.1)
+
+        self.sock_out = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+        self.random_loss = RandomLossConfig()
+        self.burst_loss = BurstLossConfig()
+        self.latency_jitter = LatencyJitterConfig()
+        self.throttle = ThrottleConfig()
+        self.blackout = BlackoutConfig()
+
+        self.delay_queue = DelayQueue()
+        self.running = False
+
+        self.total_in = 0
+        self.total_forwarded = 0
+        self.total_dropped = 0
+
+    # ----------------------------
+    # Config helper functions
+    # ----------------------------
+
+    def set_random_loss(self, loss_prob: float): #droped packets independently based on set probability
+        self.random_loss = RandomLossConfig(enabled=True, loss_prob=loss_prob)
+
+    def disable_random_loss(self):
+        self.random_loss = RandomLossConfig()
+
+    def set_burst_loss(self, burst_duration_s: float, interval_s: float = 5.0): #drops all packets for a window
+        now = time.time()
+        self.burst_loss = BurstLossConfig(
+            enabled=True,
+            burst_duration_s=burst_duration_s,
+            interval_s=interval_s,
+            next_burst_start=now + interval_s,
+            burst_end=0.0,
+        )
+
+    def disable_burst_loss(self):
+        self.burst_loss = BurstLossConfig()
+
+    def set_latency_jitter(self, base_latency_s: float, jitter_s: float):
+        self.latency_jitter = LatencyJitterConfig(
+            enabled=True,
+            base_latency_s=base_latency_s,
+            jitter_s=jitter_s,
+        )
+
+    def disable_latency_jitter(self):
+        self.latency_jitter = LatencyJitterConfig()
+
+    def set_throttle(self, keep_every_n: int):#drops every n packet
+        if keep_every_n < 1:
+            raise ValueError("keep_every_n must be >= 1")
+        self.throttle = ThrottleConfig(
+            enabled=True,
+            keep_every_n=keep_every_n,
+            counter=0,
+        )
+
+    def disable_throttle(self):
+        self.throttle = ThrottleConfig()
+
+    def set_blackout(self, blackout_duration_s: float, interval_s: float = 20.0):#total packet disruption
+        now = time.time()
+        self.blackout = BlackoutConfig(
+            enabled=True,
+            blackout_duration_s=blackout_duration_s,
+            interval_s=interval_s,
+            next_blackout_start=now + interval_s,
+            blackout_end=0.0,
+        )
+
+    def disable_blackout(self):
+        self.blackout = BlackoutConfig()
+
+    def clear_all(self):
+        self.disable_random_loss()
+        self.disable_burst_loss()
+        self.disable_latency_jitter()
+        self.disable_throttle()
+        self.disable_blackout()
+
+    # ----------------------------
+    # Interference logic
+    # ----------------------------
+
+    def _blackout_active(self, now: float) -> bool:
+        if not self.blackout.enabled:
+            return False
+
+        if self.blackout.blackout_end > now:
+            return True
+
+        if now >= self.blackout.next_blackout_start:
+            self.blackout.blackout_end = now + self.blackout.blackout_duration_s
+            self.blackout.next_blackout_start = now + self.blackout.interval_s
+            print(f"[BLACKOUT] Starting blackout for {self.blackout.blackout_duration_s:.3f}s")
+            return True
+
+        return False
+
+    def _burst_active(self, now: float) -> bool:
+        if not self.burst_loss.enabled:
+            return False
+
+        if self.burst_loss.burst_end > now:
+            return True
+
+        if now >= self.burst_loss.next_burst_start:
+            self.burst_loss.burst_end = now + self.burst_loss.burst_duration_s
+            self.burst_loss.next_burst_start = now + self.burst_loss.interval_s
+            print(f"[BURST] Starting burst drop for {self.burst_loss.burst_duration_s:.3f}s")
+            return True
+
+        return False
+
+    def _should_drop_by_random_loss(self) -> bool:
+        if not self.random_loss.enabled:
+            return False
+        return random.random() < self.random_loss.loss_prob
+
+    def _should_drop_by_throttle(self) -> bool:
+        if not self.throttle.enabled:
+            return False
+
+        self.throttle.counter += 1
+        keep = (self.throttle.counter % self.throttle.keep_every_n) == 0
+        return not keep
+
+    def _compute_delay(self) -> float:
+        if not self.latency_jitter.enabled:
+            return 0.0
+
+        jitter = random.uniform(
+            -self.latency_jitter.jitter_s,
+            self.latency_jitter.jitter_s,
+        )
+        delay = self.latency_jitter.base_latency_s + jitter
+        return max(0.0, delay)
+
+    def _process_packet(self, packet: bytes):
+        now = time.time()
+
+        # 1. Full blackout has highest priority
+        if self._blackout_active(now):
+            self.total_dropped += 1
+            return
+
+        # 2. Burst loss
+        if self._burst_active(now):
+            self.total_dropped += 1
+            return
+
+        # 3. Random packet loss
+        if self._should_drop_by_random_loss():
+            self.total_dropped += 1
+            return
+
+        # 4. Message throttling
+        if self._should_drop_by_throttle():
+            self.total_dropped += 1
+            return
+
+        # 5. Latency + jitter
+        delay = self._compute_delay()
+        if delay > 0:
+            send_time = now + delay
+            self.delay_queue.push(send_time, packet, self.forward_addr)
+        else:
+            self.sock_out.sendto(packet, self.forward_addr)
+            self.total_forwarded += 1
+
+    def _delay_sender_loop(self):
+        while self.running:
+            now = time.time()
+            ready = self.delay_queue.pop_ready(now)
+            for _, packet, addr in ready:
+                self.sock_out.sendto(packet, addr)
+                self.total_forwarded += 1
+            time.sleep(0.001)
+
+    def start(self):
+        self.running = True
+        threading.Thread(target=self._delay_sender_loop, daemon=True).start()
+
+        print(f"[INFO] Listening on UDP {self.listen_addr[0]}:{self.listen_addr[1]}")
+        print(f"[INFO] Forwarding to UDP {self.forward_addr[0]}:{self.forward_addr[1]}")
+
+        while self.running:
+            try:
+                packet, src_addr = self.sock_in.recvfrom(65535)
+                self.total_in += 1
+                self._process_packet(packet)
+            except socket.timeout:
+                continue
+            except KeyboardInterrupt:
+                self.running = False
+            except Exception as e:
+                print(f"[ERROR] {e}")
+
+        self.sock_in.close()
+        self.sock_out.close()
+
+    def stop(self):
+        self.running = False
+
+    def print_stats(self):
+        print(
+            f"[STATS] in={self.total_in} "
+            f"forwarded={self.total_forwarded} "
+            f"dropped={self.total_dropped}"
+        )
+
+
+# ---------------------------------------
+# Example scenario helpers
+# ---------------------------------------
+
+def scenario_random_loss(proxy: UDPInterferenceProxy, loss_prob: float):
+    proxy.clear_all()
+    proxy.set_random_loss(loss_prob)
+    print(f"[SCENARIO] Random packet loss = {loss_prob * 100:.1f}%")
+
+
+def scenario_burst_loss(proxy: UDPInterferenceProxy, burst_ms: int, interval_s: float = 5.0):
+    proxy.clear_all()
+    proxy.set_burst_loss(burst_duration_s=burst_ms / 1000.0, interval_s=interval_s)
+    print(f"[SCENARIO] Burst loss = all packets dropped for {burst_ms} ms every {interval_s}s")
+
+
+def scenario_latency_jitter(proxy: UDPInterferenceProxy, latency_ms: int, jitter_ms: int):
+    proxy.clear_all()
+    proxy.set_latency_jitter(
+        base_latency_s=latency_ms / 1000.0,
+        jitter_s=jitter_ms / 1000.0,
+    )
+    print(f"[SCENARIO] Latency = {latency_ms} ms, jitter = +/- {jitter_ms} ms")
+
+
+def scenario_throttle(proxy: UDPInterferenceProxy, keep_every_n: int):
+    proxy.clear_all()
+    proxy.set_throttle(keep_every_n=keep_every_n)
+    print(f"[SCENARIO] Message throttling = keep 1 out of every {keep_every_n} packets")
+
+
+def scenario_blackout(proxy: UDPInterferenceProxy, blackout_s: float, interval_s: float = 20.0):
+    proxy.clear_all()
+    proxy.set_blackout(blackout_duration_s=blackout_s, interval_s=interval_s)
+    print(f"[SCENARIO] Full blackout = {blackout_s:.1f}s every {interval_s}s")
+
+
+if __name__ == "__main__":
+    # Example:
+    # ArduPilot/MAVProxy sends to 127.0.0.1:14560
+    # Proxy forwards to your pymavlink script on 127.0.0.1:14550
+    proxy = UDPInterferenceProxy(
+        listen_host="127.0.0.1",
+        listen_port=14560,
+        forward_host="127.0.0.1",
+        forward_port=14550,
+    )
+
+    # Pick one scenario at a time:
+    # scenario_random_loss(proxy, 0.05)       # 5%
+    # scenario_random_loss(proxy, 0.20)       # 20%
+    # scenario_random_loss(proxy, 0.50)       # 50%
+
+    # scenario_burst_loss(proxy, 100)
+    # scenario_burst_loss(proxy, 200)
+    # scenario_burst_loss(proxy, 500)
+    # scenario_burst_loss(proxy, 1000)
+
+    # scenario_latency_jitter(proxy, 100, 25)
+    # scenario_latency_jitter(proxy, 200, 50)
+    # scenario_latency_jitter(proxy, 500, 200)
+
+    # scenario_throttle(proxy, 5)
+    # scenario_throttle(proxy, 10)
+    # scenario_throttle(proxy, 20)
+
+    scenario_blackout(proxy, 3.0)
+
+    try:
+        proxy.start()
+    finally:
+        proxy.print_stats()
