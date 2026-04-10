@@ -93,6 +93,8 @@ class BidirectionalLocalHotspotProxy:
         self.burst_end = 0.0
         self.throttle_counter = 0
 
+
+
     def update_position_from_packet(self, packet):
         for byte_value in packet:
             try:
@@ -277,15 +279,15 @@ if __name__ == "__main__":
     proxy.center_x_m = 50.0
     proxy.center_y_m = 25.0
     proxy.radius_m = 100.0
-    proxy.blackout_radius_m = 0.0
+    proxy.blackout_radius_m = 0
     proxy.falloff_power = 1.5
 
-    proxy.max_random_loss_prob = 0.0
-    proxy.max_base_latency_s = 0.0
-    proxy.max_jitter_s = 0.0
+    proxy.max_random_loss_prob = 0
+    proxy.max_base_latency_s = 0
+    proxy.max_jitter_s = 0
     proxy.max_keep_every_n = 1
-    proxy.max_burst_trigger_prob = 0.0
-    proxy.max_burst_duration_s = 0.0
+    proxy.max_burst_trigger_prob = 0
+    proxy.max_burst_duration_s = 0
 
     try:
         proxy.start()
