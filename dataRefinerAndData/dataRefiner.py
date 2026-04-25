@@ -48,7 +48,7 @@ def refine_file(input_path: str, output_path: str):
             quarter_microsecond = (timestamp.microsecond // 250000) * 250000
             quarter_key = timestamp.replace(microsecond=quarter_microsecond)
             if quarter_key != last_quarter:
-                processed_fields = [field for idx, field in enumerate(fields) if idx not in {0, 7, 8, 9, 10, 11, 12}]
+                processed_fields = [field for idx, field in enumerate(fields) if idx not in {0, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 17, 18, 22, 23, 24, 31, 32, 33, 34, 35, 36, 37, 38, 47}]
                 kept_lines.append(",".join(processed_fields))
                 last_quarter = quarter_key
 
