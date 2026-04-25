@@ -1,0 +1,75 @@
+Simulation Overview
+The drone will be controlled through ArduPilot which uses MAVlink to communicate. Pymavlink will be used to interface with the ArduPilot MAVlink to control in an ArduPilot generated environment. The simulation will be set up with five waypoints programmed in AUTO mode from ArduPilot. The obstacles at each waypoint are yet to be determined but will include packet loss, severe packet loss, intermittent connection etc. The AI model will monitor the telemetry data which will be trained by trail runs to predict impending signal loss. This will be used to monitor the drone during the mission and make optimal reactions based on what reactions reduce impending loss from the tests. When performing reactions the drone will enter GUIDED mode, and once impending signal loss is sufficiently low it will resume AUTO mode.This will be validated by testing the AI tool versus drone mission without AI tools.
+
+OLD TIMELINE/RESPONSIBILITIES
+
+
+
+Week
+Team Focus
+Joey (Simulation/ Admin)
+Landen
+Trent
+Parker
+Week 1
+Environment and project setup, organize timeline and project delivery.
+Set up SITL and MAVLink connection
+Help define telemetry features
+Research recovery behaviors
+Research experiment methodologies
+Week 2
+Build test infrastructure
+Create packet loss / delay / jitter injector
+Set up logging pipeline
+Define control-state logic
+Define evaluation metrics and experiment plan
+Week 3
+Build intelligence layer
+Support simulator testing
+Build rule-based and first AI predictor
+Prepare action triggers from risk score
+Start chart templates and results format
+Week 4
+Connect prediction to action
+Help connect MAVLink commands
+Tune risk thresholds
+Implement climb / loiter / RTL logic
+Build baseline vs AI comparison structure
+Week 5
+Run experiments
+Run repeatable scenarios
+Collect and analyze prediction performance
+Test recovery behavior reliability
+Compare downtime, recovery time, energy, disruption
+Week 6
+Polish and present
+Fix integration issues
+Finalize model explanation
+Finalize state machine explanation
+Slides, visuals, script, rehearsal
+
+
+
+
+
+
+
+Team Member Role
+Primary Responsibilities
+Key Deliverables
+Member 1: Simulation and Admin
+Set up ArduPilot SITL, Ubuntu environment, and pymavlink connection. Build the link-impairment injector to simulate packet loss, delay, jitter, burst dropouts, and full dropouts. Make sure simulation runs are repeatable. Set up a project timeline, coordinate responsibilities, and document progress.
+Working SITL simulation environment, MAVLink connection, impairment-injection script, repeatable test scenarios
+Member 2: Data and AI Lead
+Design and compute link-health features such as heartbeat interval, missed heartbeats, latency, jitter, and dropout streaks to measure signal degradation. Develop the first prediction model, starting with a rule-based risk score and then possibly a lightweight classifier (depending on difficulty and time).
+Feature definitions, telemetry logging pipeline, labeled dataset, risk model, predicted loss score output
+Member 3: Controls and Recovery Lead
+Design and implement the intervention state machine. Map risk levels to actions such as climb, slow down, loiter, return-to-home, or return-to-last-good-link. Add hysteresis and dwell time to prevent unstable switching. If this proves to be time consuming, warnings or classifications of expected interferences can be made.
+Intervention logic, state machine, prevention/recovery behaviors, simulator-integrated control actions
+Member 4: Evaluation and Presentation Lead
+Design the experiment plan comparing baseline flights and AI-enabled flights. Track metrics such as battery usage, time without link, recovery time, and mission disruption. Create graphs, visuals, slides, and coordinate the final report and presentation.
+Experiment matrix, evaluation metrics, charts/graphs, presentation visuals, final report coordination
+
+
+
+
