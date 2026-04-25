@@ -19,7 +19,7 @@ def find_timestamp(fields):
 
 
 def refine_file(input_path: str, output_path: str):
-    last_second = None
+    last_quarter = None
     kept_lines = []
 
     with open(input_path, "r", encoding="utf-8") as infile:
@@ -45,11 +45,12 @@ def refine_file(input_path: str, output_path: str):
                 )
                 continue
 
-            second_key = timestamp.replace(microsecond=0)
-            if second_key != last_second:
+            quarter_microsecond = (timestamp.microsecond // 250000) * 250000
+            quarter_key = timestamp.replace(microsecond=quarter_microsecond)
+            if quarter_key != last_quarter:
                 processed_fields = [field for idx, field in enumerate(fields) if idx not in {0, 7, 8, 9, 10, 11, 12}]
                 kept_lines.append(",".join(processed_fields))
-                last_second = second_key
+                last_quarter = quarter_key
 
     with open(output_path, "w", encoding="utf-8") as outfile:
         outfile.write("\n".join(kept_lines))
