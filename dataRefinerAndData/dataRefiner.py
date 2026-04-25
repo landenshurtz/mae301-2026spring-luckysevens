@@ -54,7 +54,7 @@ def refine_file(input_path: str, output_path: str):
                     if idx not in {
                         0, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
                         17, 18, 22, 23, 24, 31, 32, 33, 34, 35, 36, 37, 38,
-                        47,
+                        47, 49,
                     }
                     and field.strip() != ""
                 ]

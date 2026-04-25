@@ -11,3 +11,5 @@
    Run mission control (Parker will probably want to program a auto run/export feature
 5. Data
    extract/parse as whatever file you think is best (.txt seems best), with the data you think is most important for the model (time, hearatbeats, packet count etc.)
+6. Model
+   To run the model, run py ai_model.py inside the dataRefinerAndData folder (or python ai_model.py if you have it setup that way). You can also run py ai_model.py --combine-outputs in order to combine predicted dropped and returned packets.
