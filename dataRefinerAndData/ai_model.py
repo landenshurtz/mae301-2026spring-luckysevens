@@ -7,15 +7,55 @@ from pathlib import Path
 from typing import List, Tuple
 
 DEFAULT_CSV_PATHS = [
-    "run_002_mild_out.csv",
-    "run_003_moderate_out.csv",
-    "run_004_pretty_bad_out.csv",
-    "run_005_severe_out.csv",
+    "run_001_out.csv",
+    "run_002_out.csv",
+    "run_003_out.csv",
+    "run_004_out.csv",
+    "run_005_out.csv",
+    "run_006_out.csv",
+    "run_007_out.csv",
+    "run_008_out.csv",
+    "run_009_out.csv",
+    "run_010_out.csv",
+    "run_011_out.csv",
+    "run_012_out.csv",
+    "run_013_out.csv",
+    "run_014_out.csv",
+    "run_015_out.csv",
+    "run_016_out.csv",
+    "run_017_out.csv",
+    "run_018_out.csv",
+    "run_019_out.csv",
+    "run_020_out.csv",
+    "run_021_out.csv",
+    "run_022_out.csv",
+    "run_023_out.csv",
+    "run_024_out.csv",
+    "run_025_out.csv",
+    "run_026_out.csv",
+    "run_027_out.csv",
+    "run_028_out.csv",
+    "run_029_out.csv",
+    "run_030_out.csv",
+    "run_031_out.csv",
+    "run_032_out.csv",
+    "run_033_out.csv",
+    "run_034_out.csv",
+    "run_035_out.csv",
+    "run_036_out.csv",
+    "run_037_out.csv",
+    "run_038_out.csv",
+    "run_039_out.csv",
+    "run_040_out.csv",
+    "run_041_out.csv",
+    "run_042_out.csv",
+    "run_043_out.csv",
+    "run_044_out.csv",
 ]
-INPUT_WINDOW = 3
+INPUT_WINDOW = 8
 FORECAST_HORIZON = 20
-LABEL_INDICES = (19, 20)
-EXPECTED_COLUMN_COUNT = 21
+LABEL_INDICES = (20, 21)
+EXPECTED_COLUMN_COUNT = 22
 
 
 def read_csv_rows(csv_path: Path) -> List[List[float]]:
@@ -139,7 +179,7 @@ def solve_linear_system(a: List[List[float]], b: List[float]) -> List[float]:
 
     for i in range(n):
         pivot_row = max(range(i, n), key=lambda r: abs(augmented[r][i]))
-        if abs(augmented[pivot_row][i]) < 1e-12:
+        if abs(augmented[pivot_row][i]) < 1e-10:
             raise ValueError("Matrix is singular or nearly singular")
         augmented[i], augmented[pivot_row] = augmented[pivot_row], augmented[i]
 
@@ -176,7 +216,7 @@ def fit_linear_regression(X: List[List[float]], y: List[List[float]]) -> Tuple[L
         target_vector = [dot_product(col, target_column) for col in X_design_T]
         regularized = [row[:] for row in gram_matrix]
         for diag_index in range(num_features):
-            regularized[diag_index][diag_index] += 1e-4
+            regularized[diag_index][diag_index] += 1e-2
         beta = solve_linear_system(regularized, target_vector)
         weights.append(beta)
 
@@ -417,7 +457,7 @@ def main() -> None:
     report_metrics("Training", train_y, train_predictions, args.combine_outputs)
     report_metrics("Testing", test_y, test_predictions, args.combine_outputs)
 
-    sample_index = min(3, len(test_X) - 1)
+    sample_index = min(9, len(test_X) - 1)
     print("\nSample test predictions:")
     if args.combine_outputs:
         print("(total):")
