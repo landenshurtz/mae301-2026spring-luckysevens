@@ -3,8 +3,15 @@ import csv
 import json
 import math
 import random
+from itertools import combinations_with_replacement
 from pathlib import Path
 from typing import List, Tuple
+
+try:
+    import numpy as np
+except ImportError:
+    np = None
+
 
 DEFAULT_CSV_PATHS = [
     "run_001_out.csv",
@@ -52,10 +59,20 @@ DEFAULT_CSV_PATHS = [
     "run_043_out.csv",
     "run_044_out.csv",
 ]
-INPUT_WINDOW = 8
+INPUT_WINDOW = 6
 FORECAST_HORIZON = 20
-LABEL_INDICES = (20, 21)
-EXPECTED_COLUMN_COUNT = 22
+LABEL_INDICES = (25, 26)
+EXPECTED_COLUMN_COUNT = 27
+POLY_FEATURE_COUNT_WARNING = 50000
+
+
+def estimate_polynomial_feature_count(num_features: int, degree: int) -> int:
+    if degree <= 1 or num_features <= 0:
+        return num_features
+    total = num_features
+    for k in range(2, degree + 1):
+        total += math.comb(num_features + k - 1, k)
+    return total
 
 
 def read_csv_rows(csv_path: Path) -> List[List[float]]:
@@ -159,6 +176,31 @@ def filter_features(
     return X_filtered, y
 
 
+def generate_polynomial_features(features: List[float], degree: int) -> List[float]:
+    """Generate polynomial features up to specified degree using itertools.
+    
+    For degree 3, generates: x_i, x_i*x_j, x_i*x_j*x_k, x_i^2, x_i^2*x_j, x_i^3, etc.
+    This is much more efficient than recursive generation.
+    """
+    if degree < 1:
+        return features
+    
+    poly_features: List[float] = features[:]
+    
+    # Generate all combinations of feature indices with replacement up to degree
+    num_features = len(features)
+    
+    for current_degree in range(2, degree + 1):
+        # combinations_with_replacement generates all sorted tuples of indices
+        for combo in combinations_with_replacement(range(num_features), current_degree):
+            product = 1.0
+            for idx in combo:
+                product *= features[idx]
+            poly_features.append(product)
+    
+    return poly_features
+
+
 def transpose(matrix: List[List[float]]) -> List[List[float]]:
     if not matrix:
         return []
@@ -198,7 +240,39 @@ def solve_linear_system(a: List[List[float]], b: List[float]) -> List[float]:
     return [row[-1] for row in augmented]
 
 
-def fit_linear_regression(X: List[List[float]], y: List[List[float]]) -> Tuple[List[List[float]], List[List[float]]]:
+def fit_linear_regression_numpy(X: List[List[float]], y: List[List[float]], alpha: float = 1e-2) -> Tuple[List[List[float]], List[List[float]]]:
+    X_arr = np.array(X, dtype=float)
+    y_arr = np.array(y, dtype=float)
+    X_design = np.hstack([np.ones((X_arr.shape[0], 1), dtype=float), X_arr])
+    Gram = X_design.T @ X_design
+    Gram[np.diag_indices_from(Gram)] += alpha
+    target = X_design.T @ y_arr
+
+    try:
+        beta = np.linalg.solve(Gram, target)
+    except np.linalg.LinAlgError:
+        beta = np.linalg.pinv(Gram) @ target
+
+    if y_arr.ndim == 1:
+        beta = beta.reshape(-1, 1)
+        y_arr = y_arr.reshape(-1, 1)
+
+    weights = [beta[:, i].tolist() for i in range(beta.shape[1])]
+
+    predictions = X_design @ beta
+    residuals = y_arr - predictions
+    degrees_of_freedom = max(X_design.shape[0] - X_design.shape[1], 1)
+    sigma_squared = np.sum(residuals**2, axis=0) / degrees_of_freedom
+    inv_Gram = np.linalg.pinv(Gram)
+    diag = np.diag(inv_Gram)
+    std_errors = [np.sqrt(np.maximum(sigma_squared[i] * diag, 0.0)).tolist() for i in range(beta.shape[1])]
+    return weights, std_errors
+
+
+def fit_linear_regression(X: List[List[float]], y: List[List[float]], alpha: float = 1e-2) -> Tuple[List[List[float]], List[List[float]]]:
+    if np is not None:
+        return fit_linear_regression_numpy(X, y, alpha)
+
     if not X or not y:
         raise ValueError("Cannot fit model without data")
 
@@ -216,7 +290,7 @@ def fit_linear_regression(X: List[List[float]], y: List[List[float]]) -> Tuple[L
         target_vector = [dot_product(col, target_column) for col in X_design_T]
         regularized = [row[:] for row in gram_matrix]
         for diag_index in range(num_features):
-            regularized[diag_index][diag_index] += 1e-2
+            regularized[diag_index][diag_index] += alpha
         beta = solve_linear_system(regularized, target_vector)
         weights.append(beta)
 
@@ -245,8 +319,13 @@ def fit_linear_regression(X: List[List[float]], y: List[List[float]]) -> Tuple[L
     return weights, std_errors
 
 
-def predict(weights: List[List[float]], features: List[float]) -> List[float]:
-    x_design = [1.0] + features
+def predict(weights: List[List[float]], features: List[float], polynomial_degree: int = 1) -> List[float]:
+    """Predict using weights. If polynomial_degree > 1, generate polynomial features first."""
+    if polynomial_degree > 1:
+        features_expanded = generate_polynomial_features(features, polynomial_degree)
+    else:
+        features_expanded = features
+    x_design = [1.0] + features_expanded
     return [dot_product(weight_vector, x_design) for weight_vector in weights]
 
 
@@ -376,7 +455,7 @@ def report_metrics(name: str, y_true: List[List[float]], y_pred: List[List[float
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Train a linear regression model using all variables from the previous 5 lines "
+        description="Train a polynomial ridge regression model using all variables from the previous 5 lines "
                     "to predict increases in total dropped and returned packets after 5 seconds."
     )
     parser.add_argument(
@@ -406,6 +485,18 @@ def main() -> None:
         default="",
         help="Comma-separated list of feature indices to exclude (e.g., '0,5,10,15').",
     )
+    parser.add_argument(
+        "--polynomial-degree",
+        type=int,
+        default=1,
+        help="Polynomial degree for feature expansion (1=linear, 2=quadratic, 3=cubic, etc.).",
+    )
+    parser.add_argument(
+        "--ridge-alpha",
+        type=float,
+        default=1e-2,
+        help="Ridge regularization strength added to the diagonal of X^T X.",
+    )
     args = parser.parse_args()
 
     base_path = Path(__file__).resolve().parent
@@ -427,8 +518,23 @@ def main() -> None:
         except ValueError:
             print("Warning: Invalid --exclude-columns format. Expected comma-separated integers.")
 
-    weights, std_errors = fit_linear_regression(train_X, train_y)
-    print("Trained linear regression model with feature dimension", len(train_X[0]) + 1)
+    # Apply polynomial transformation if degree > 1
+    if args.polynomial_degree > 1:
+        print(f"Expanding features to polynomial degree {args.polynomial_degree}...")
+        original_feature_count = len(train_X[0]) if train_X else 0
+        expected_feature_count = estimate_polynomial_feature_count(original_feature_count, args.polynomial_degree)
+        if expected_feature_count > POLY_FEATURE_COUNT_WARNING:
+            print(
+                f"Warning: estimated polynomial expansion will create {expected_feature_count} features. "
+                "This may be very slow or may not finish. Reduce --polynomial-degree or exclude more features."
+            )
+        train_X = [generate_polynomial_features(x, args.polynomial_degree) for x in train_X]
+        test_X = [generate_polynomial_features(x, args.polynomial_degree) for x in test_X]
+        expanded_feature_count = len(train_X[0]) if train_X else 0
+        print(f"Expanded from {original_feature_count} to {expanded_feature_count} features")
+
+    weights, std_errors = fit_linear_regression(train_X, train_y, alpha=args.ridge_alpha)
+    print("Trained polynomial ridge regression model with feature dimension", len(train_X[0]) + 1)
 
     irrelevant_features = analyze_feature_importance(weights, std_errors, INPUT_WINDOW, EXPECTED_COLUMN_COUNT, args.combine_outputs)
 
@@ -441,8 +547,8 @@ def main() -> None:
         train_X_filtered = filter_irrelevant_features(train_X, irrelevant_features)
         test_X_filtered = filter_irrelevant_features(test_X, irrelevant_features)
         
-        weights, std_errors = fit_linear_regression(train_X_filtered, train_y)
-        print("Retrained simplified linear regression model with feature dimension", len(train_X_filtered[0]) + 1)
+        weights, std_errors = fit_linear_regression(train_X_filtered, train_y, alpha=args.ridge_alpha)
+        print("Retrained simplified polynomial ridge regression model with feature dimension", len(train_X_filtered[0]) + 1)
         
         # Update train_X and test_X for evaluation
         train_X, test_X = train_X_filtered, test_X_filtered
@@ -451,8 +557,8 @@ def main() -> None:
         save_model(base_path / args.save_model, weights)
         print(f"Saved trained model weights to {args.save_model}")
 
-    train_predictions = [predict(weights, x) for x in train_X]
-    test_predictions = [predict(weights, x) for x in test_X]
+    train_predictions = [predict(weights, x, polynomial_degree=1) for x in train_X]
+    test_predictions = [predict(weights, x, polynomial_degree=1) for x in test_X]
 
     report_metrics("Training", train_y, train_predictions, args.combine_outputs)
     report_metrics("Testing", test_y, test_predictions, args.combine_outputs)
