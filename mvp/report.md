@@ -7,8 +7,13 @@
  Create an AI assisted drone safety system that monitors flight data to predict if the projected flight path is safe to continue on or should be altered then notifys the pilot of a suggested course of action.
 ## User & Use Case
 ### User:
-
+Commercial drone pilots: Drones are frequently used in the construction, agriculture, delivery, and real estate industries to inspect, survey, deliver packages, and capture film.  
+Military drone pilots: More and more air force missions are being carried out by Unmanned Aeriel Vehicles for surveillance and strike missions.
 ### Use Case:
+Any situation where the drone is flying far enough away, low enough to the terrain, or through enough interference where signal loss is a major risk.
+- Military surveillance missions are frequently across vast distances which would cause a signal loss to be catastrophic for the mission.  
+- Commercial inspection of infastructure like bridges buidings or powerlines are typically located in high interference areas.
+- delivery drones fly through dense urban areas where interference is high
 ## System Design
 
 ## Data
