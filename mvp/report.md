@@ -83,7 +83,7 @@ A simple qualitative evaluation would be is the information presented to the pil
 ### Simulation  
 The use of the ArduPilot drone simulator is convenient for testing and training the models however simulations are always a little different from real world conditions because there is so many different factors effecting a drone in the real world that would be very difficult to fully simulate. Therefore a version of this design will require additional real world testing before widespread release.
 ### Models  
-Linear Regression: The linear regression model being used is relatively simple and explainable which might struggle when presented with complex non linear communication loss patterns.
+Linear Regression: The linear regression model being used is relatively simple and explainable which might struggle when presented with complex non linear communication loss patterns.  
 AI backend: In its current state the AI backend is rule based rather than a fully trained deep learning model.
 ### Integration 
 The teams current project contains many different systems that all must communicate with each other accurately because there is so many different systems integrating them all to work together in real time will pose a reasonable technical challenge.
