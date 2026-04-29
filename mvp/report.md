@@ -15,7 +15,28 @@ Any situation where the drone is flying far enough away, low enough to the terra
 - Military surveillance missions are frequently across vast distances which would cause a signal loss to be catastrophic for the mission.  
 - Commercial inspection of infastructure like bridges buidings or powerlines are typically located in high interference areas.
 - delivery drones fly through dense urban areas where interference is high
+
+Example use case: 
+A drone pilot for the military is conducting a surveillance mission along a pre planned route while in route the drone sends flight and communication data to the pilot that indicates increased signal interference the data is cleaned of unneccesary information and sent to an AI model which predicts whether the trends of the data indicate a major problem ahead or if it is safe to continue. The model then communicates this prediction to the pilot by recommending an action such as slow down, re route the flight path, or return to base
 ## System Design
+For the purpose of testing a drone simulation was utilized in this project to simulate multiple different drone flight paths with the option of adding interference obstacles along the flight path  
+
+
+ArduPilot Simulation
+         |
+         V
+
+         |
+         V
+
+         |
+         V
+
+         |
+         V
+
+         |
+         V
 
 ## Data
 
