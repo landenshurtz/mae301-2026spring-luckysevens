@@ -1,0 +1,254 @@
+(venv-ardupilot) joeyehardiman@K3PRO:/mnt/c/Users/Kids Computer Left/Desktop/PythonDirectory/ASU_Projects/AS$ python3 mission_control_fixed.py
+Mission control starting
+Connected to system 1, component 0
+Heartbeat reported component 0; using autopilot component 1 for flight commands
+[RISK] Listening for proxy risk stream on UDP 0.0.0.0:14600
+[RISK] dataRefiner: normal import failed: No module named 'dataRefiner'
+[RISK] ai_model: normal import failed: No module named 'ai_model'
+[RISK] model: no risk_model.json; using fallback score until online ai_model fit has enough rows
+[RISK] live rows: expected_columns=22, input_window=3
+Waiting for GPS + EKF position estimate
+[RISK] score=0.190 source=fallback packet=9548 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/9548
+Global position lat=-35.3632622, lon=149.1652375, rel_alt=-0.01 m
+GPS fix_type=6 satellites=10
+EKF flags=831 ekf_ok=True
+HOME_POSITION lat=-35.3632621, lon=149.1652374, alt=584.09 m
+GPS fix_type=6 satellites=10
+EKF flags=831 ekf_ok=True
+Global position lat=-35.3632622, lon=149.1652375, rel_alt=-0.01 m
+GPS fix_type=6 satellites=10
+EKF flags=831 ekf_ok=True
+HOME_POSITION lat=-35.3632621, lon=149.1652374, alt=584.09 m
+Global position lat=-35.3632622, lon=149.1652375, rel_alt=-0.01 m
+GPS fix_type=6 satellites=10
+EKF flags=831 ekf_ok=True
+Global position lat=-35.3632622, lon=149.1652375, rel_alt=-0.01 m
+GPS fix_type=6 satellites=10
+EKF flags=831 ekf_ok=True
+Global position lat=-35.3632622, lon=149.1652375, rel_alt=-0.01 m
+GPS fix_type=6 satellites=10
+EKF flags=831 ekf_ok=True
+Global position lat=-35.3632622, lon=149.1652375, rel_alt=-0.01 m
+Position estimate ready
+[RISK] score=0.190 source=fallback packet=9706 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/9706
+[RISK] score=0.190 source=fallback packet=9847 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/9847
+Requesting home position = current position
+COMMAND_ACK command=179 result=0 (ACCEPTED)
+Step-by-step GUIDED route:
+  1: lat=-35.3630622, lon=149.1654375, alt=10.0 m
+  2: lat=-35.3628622, lon=149.1656375, alt=10.0 m
+  3: lat=-35.3626622, lon=149.1654375, alt=10.0 m
+  4: lat=-35.3624622, lon=149.1652375, alt=10.0 m
+  5: lat=-35.3622622, lon=149.1650375, alt=10.0 m
+Requested mode change to GUIDED
+Mode confirmed: GUIDED
+Arm attempt 1/5
+Sent arm command
+Arm COMMAND_ACK result=0 (ACCEPTED)
+Arming accepted
+[RISK] score=0.190 source=fallback packet=9968 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/9968
+[RISK] score=0.190 source=fallback packet=10110 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/10110
+About to send GUIDED takeoff
+Sent GUIDED takeoff command to 10.0 m
+[AP] Arming motors
+COMMAND_ACK command=22 result=0 (ACCEPTED)
+Waiting to reach takeoff altitude
+Relative altitude: 0.00 m
+Relative altitude: 0.00 m
+Relative altitude: 0.00 m
+[RISK] score=0.190 source=fallback packet=10224 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/10224
+Relative altitude: 0.00 m
+Relative altitude: 0.00 m
+Relative altitude: 0.00 m
+Relative altitude: 0.01 m
+Relative altitude: 0.03 m
+Relative altitude: 0.08 m
+[RISK] score=0.190 source=fallback packet=10365 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/10365
+Relative altitude: 0.15 m
+Relative altitude: 0.36 m
+Relative altitude: 0.61 m
+Relative altitude: 0.84 m
+Relative altitude: 1.11 m
+Relative altitude: 1.42 m
+[RISK] score=0.190 source=fallback packet=10506 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/10506
+Relative altitude: 1.76 m
+Relative altitude: 2.15 m
+Relative altitude: 2.59 m
+[AP] EKF3 IMU0 MAG0 in-flight yaw alignment complete
+[AP] EKF3 IMU1 MAG0 in-flight yaw alignment complete
+Relative altitude: 3.06 m
+Relative altitude: 3.56 m
+[RISK] score=0.190 source=fallback packet=10621 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/10621
+Relative altitude: 4.07 m
+Relative altitude: 4.58 m
+Relative altitude: 5.09 m
+Relative altitude: 5.59 m
+Relative altitude: 6.10 m
+[RISK] score=0.190 source=fallback packet=10735 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/10735
+Relative altitude: 6.72 m
+Relative altitude: 7.32 m
+Relative altitude: 7.88 m
+Relative altitude: 8.38 m
+Relative altitude: 8.81 m
+[RISK] score=0.190 source=fallback packet=10874 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/10874
+Relative altitude: 9.17 m
+Relative altitude: 9.46 m
+Reached takeoff altitude: 9.46 m
+[RISK] score=0.190 source=fallback packet=11016 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/11016
+Starting step-by-step GUIDED route
+Sending waypoint 1/5
+Sent GUIDED waypoint lat=-35.3630622, lon=149.1654375, alt=10.0 m
+Waypoint check: dist=28.70 m, rel_alt=9.69 m, alt_err=0.31 m
+[RISK] score=0.190 source=fallback packet=11155 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/11155
+Waypoint check: dist=28.29 m, rel_alt=9.95 m, alt_err=0.05 m
+[RISK] score=0.193 source=fallback packet=11272 decision=forward strength=0.297 distance=55.5m delay=0.000s queue=0 drops=0/11272
+Waypoint check: dist=25.28 m, rel_alt=9.97 m, alt_err=0.03 m
+[RISK] score=0.218 source=fallback packet=11418 decision=forward strength=0.336 distance=51.7m delay=0.000s queue=0 drops=0/11418
+Waypoint check: dist=19.93 m, rel_alt=9.99 m, alt_err=0.01 m
+[RISK] score=0.278 source=fallback packet=11564 decision=forward strength=0.427 distance=43.3m delay=0.000s queue=0 drops=0/11564
+Waypoint check: dist=10.96 m, rel_alt=10.01 m, alt_err=0.01 m
+[RISK] score=0.341 source=fallback packet=11711 decision=forward strength=0.525 distance=34.9m delay=0.000s queue=0 drops=0/11711
+Waypoint check: dist=4.69 m, rel_alt=10.00 m, alt_err=0.00 m
+[RISK] score=0.377 source=fallback packet=11828 decision=forward strength=0.580 distance=30.4m delay=0.000s queue=0 drops=0/11828
+Waypoint progress stalled; re-sending current waypoint
+Sent GUIDED waypoint lat=-35.3630622, lon=149.1654375, alt=10.0 m
+Waypoint check: dist=0.76 m, rel_alt=10.01 m, alt_err=0.01 m
+[RISK] score=0.397 source=fallback packet=11975 decision=forward strength=0.610 distance=28.0m delay=0.000s queue=0 drops=0/11975
+Waypoint check: dist=0.60 m, rel_alt=10.01 m, alt_err=0.01 m
+Waypoint reached
+[RISK] score=0.396 source=fallback packet=12121 decision=forward strength=0.609 distance=28.2m delay=0.000s queue=0 drops=0/12121
+Sending waypoint 2/5
+Sent GUIDED waypoint lat=-35.3628622, lon=149.1656375, alt=10.0 m
+Waypoint check: dist=28.13 m, rel_alt=10.01 m, alt_err=0.01 m
+[RISK] score=0.397 source=fallback packet=12238 decision=forward strength=0.610 distance=28.1m delay=0.000s queue=0 drops=0/12238
+Waypoint check: dist=27.55 m, rel_alt=10.01 m, alt_err=0.01 m
+[RISK] score=0.426 source=fallback packet=12384 decision=forward strength=0.655 distance=24.5m delay=0.000s queue=0 drops=0/12384
+Waypoint check: dist=23.17 m, rel_alt=10.01 m, alt_err=0.01 m
+[RISK] score=0.462 source=fallback packet=12501 decision=forward strength=0.711 distance=20.4m delay=0.000s queue=0 drops=0/12501
+Waypoint check: dist=15.59 m, rel_alt=10.00 m, alt_err=0.00 m
+[RISK] score=0.509 source=fallback packet=12616 decision=forward strength=0.783 distance=15.0m delay=0.000s queue=0 drops=0/12616
+Waypoint check: dist=6.57 m, rel_alt=10.00 m, alt_err=0.00 m
+[RISK] score=0.534 source=fallback packet=12759 decision=forward strength=0.822 distance=12.3m delay=0.000s queue=0 drops=0/12759
+Waypoint check: dist=1.02 m, rel_alt=9.99 m, alt_err=0.01 m
+Waypoint progress stalled; re-sending current waypoint
+Sent GUIDED waypoint lat=-35.3628622, lon=149.1656375, alt=10.0 m
+[RISK] score=0.532 source=fallback packet=12874 decision=forward strength=0.818 distance=12.5m delay=0.000s queue=0 drops=0/12874
+Waypoint check: dist=0.64 m, rel_alt=10.00 m, alt_err=0.00 m
+Waypoint reached
+[RISK] score=0.529 source=fallback packet=12989 decision=forward strength=0.815 distance=12.8m delay=0.000s queue=0 drops=0/12989
+Sending waypoint 3/5
+Sent GUIDED waypoint lat=-35.3626622, lon=149.1654375, alt=10.0 m
+Waypoint check: dist=28.62 m, rel_alt=10.01 m, alt_err=0.01 m
+[RISK] score=0.530 source=fallback packet=13105 decision=forward strength=0.816 distance=12.7m delay=0.000s queue=0 drops=0/13105
+Waypoint check: dist=28.22 m, rel_alt=10.00 m, alt_err=0.00 m
+[RISK] score=0.534 source=fallback packet=13222 decision=forward strength=0.821 distance=12.3m delay=0.000s queue=0 drops=0/13222
+Waypoint check: dist=25.24 m, rel_alt=10.00 m, alt_err=0.00 m
+[RISK] score=0.572 source=fallback packet=13368 decision=forward strength=0.880 distance=8.2m delay=0.000s queue=0 drops=0/13368
+Waypoint check: dist=19.92 m, rel_alt=9.99 m, alt_err=0.01 m
+[RISK] score=0.598 source=fallback packet=13485 decision=forward strength=0.921 distance=5.4m delay=0.000s queue=0 drops=0/13485
+Waypoint check: dist=10.97 m, rel_alt=10.00 m, alt_err=0.00 m
+[RISK] score=0.550 source=fallback packet=13631 decision=forward strength=0.846 distance=10.6m delay=0.000s queue=0 drops=0/13631
+Waypoint check: dist=4.68 m, rel_alt=9.99 m, alt_err=0.01 m
+[RISK] score=0.506 source=fallback packet=13748 decision=forward strength=0.778 distance=15.4m delay=0.000s queue=0 drops=0/13748
+Waypoint progress stalled; re-sending current waypoint
+Sent GUIDED waypoint lat=-35.3626622, lon=149.1654375, alt=10.0 m
+Waypoint check: dist=0.28 m, rel_alt=9.99 m, alt_err=0.01 m
+[RISK] score=0.478 source=fallback packet=13896 decision=forward strength=0.735 distance=18.5m delay=0.000s queue=0 drops=0/13896
+Waypoint check: dist=0.62 m, rel_alt=10.00 m, alt_err=0.00 m
+Waypoint reached
+[RISK] score=0.478 source=fallback packet=14041 decision=forward strength=0.735 distance=18.6m delay=0.000s queue=0 drops=0/14041
+Sending waypoint 4/5
+Sent GUIDED waypoint lat=-35.3624622, lon=149.1652375, alt=10.0 m
+Waypoint check: dist=28.14 m, rel_alt=10.01 m, alt_err=0.01 m
+[RISK] score=0.478 source=fallback packet=14158 decision=forward strength=0.735 distance=18.5m delay=0.000s queue=0 drops=0/14158
+Waypoint check: dist=27.31 m, rel_alt=10.00 m, alt_err=0.00 m
+[RISK] score=0.457 source=fallback packet=14303 decision=forward strength=0.703 distance=20.9m delay=0.000s queue=0 drops=0/14303
+Waypoint check: dist=23.61 m, rel_alt=10.00 m, alt_err=0.00 m
+[RISK] score=0.417 source=fallback packet=14418 decision=forward strength=0.641 distance=25.7m delay=0.000s queue=0 drops=0/14418
+Waypoint check: dist=15.77 m, rel_alt=10.00 m, alt_err=0.00 m
+[RISK] score=0.344 source=fallback packet=14562 decision=forward strength=0.529 distance=34.6m delay=0.000s queue=0 drops=0/14562
+Waypoint check: dist=8.27 m, rel_alt=10.01 m, alt_err=0.01 m
+[RISK] score=0.294 source=fallback packet=14680 decision=forward strength=0.452 distance=41.1m delay=0.000s queue=0 drops=0/14680
+Waypoint check: dist=1.94 m, rel_alt=9.99 m, alt_err=0.01 m
+Waypoint progress stalled; re-sending current waypoint
+Sent GUIDED waypoint lat=-35.3624622, lon=149.1652375, alt=10.0 m
+[RISK] score=0.258 source=fallback packet=14824 decision=forward strength=0.397 distance=46.0m delay=0.000s queue=0 drops=0/14824
+Waypoint check: dist=0.61 m, rel_alt=10.00 m, alt_err=0.00 m
+Waypoint reached
+[RISK] score=0.251 source=fallback packet=14967 decision=forward strength=0.387 distance=46.9m delay=0.000s queue=0 drops=0/14967
+Sending waypoint 5/5
+Sent GUIDED waypoint lat=-35.3622622, lon=149.1650375, alt=10.0 m
+Waypoint check: dist=28.17 m, rel_alt=10.00 m, alt_err=0.00 m
+[RISK] score=0.252 source=fallback packet=15082 decision=forward strength=0.388 distance=46.8m delay=0.000s queue=0 drops=0/15082
+Waypoint check: dist=27.91 m, rel_alt=10.00 m, alt_err=0.00 m
+[RISK] score=0.245 source=fallback packet=15228 decision=forward strength=0.376 distance=47.9m delay=0.000s queue=0 drops=0/15228
+Waypoint check: dist=25.02 m, rel_alt=10.00 m, alt_err=0.00 m
+[RISK] score=0.211 source=fallback packet=15375 decision=forward strength=0.324 distance=52.8m delay=0.000s queue=0 drops=0/15375
+Waypoint check: dist=19.73 m, rel_alt=10.00 m, alt_err=0.00 m
+[RISK] score=0.168 source=fallback packet=15492 decision=forward strength=0.258 distance=59.4m delay=0.000s queue=0 drops=0/15492
+Waypoint check: dist=12.34 m, rel_alt=10.01 m, alt_err=0.01 m
+[RISK] score=0.116 source=fallback packet=15640 decision=forward strength=0.179 distance=68.2m delay=0.000s queue=0 drops=0/15640
+Waypoint check: dist=4.55 m, rel_alt=9.98 m, alt_err=0.02 m
+Waypoint progress stalled; re-sending current waypoint
+Sent GUIDED waypoint lat=-35.3622622, lon=149.1650375, alt=10.0 m
+[RISK] score=0.088 source=fallback packet=15785 decision=forward strength=0.135 distance=73.7m delay=0.000s queue=0 drops=0/15785
+Waypoint check: dist=0.18 m, rel_alt=9.99 m, alt_err=0.01 m
+Waypoint check: dist=0.63 m, rel_alt=10.00 m, alt_err=0.00 m
+Waypoint reached
+[RISK] score=0.079 source=fallback packet=15931 decision=forward strength=0.121 distance=75.5m delay=0.000s queue=0 drops=0/15931
+All guided waypoints completed, returning home
+Requested mode change to RTL
+[RISK] score=0.079 source=fallback packet=16046 decision=forward strength=0.122 distance=75.4m delay=0.000s queue=0 drops=0/16046
+Mode confirmed: RTL
+Requested RTL
+[RISK] score=0.080 source=fallback packet=16162 decision=forward strength=0.122 distance=75.4m delay=0.000s queue=0 drops=0/16162
+[RISK] score=0.080 source=fallback packet=16306 decision=forward strength=0.123 distance=75.3m delay=0.000s queue=0 drops=0/16306
+[RISK] score=0.080 source=fallback packet=16421 decision=forward strength=0.123 distance=75.3m delay=0.000s queue=0 drops=0/16421
+[RISK] score=0.080 source=fallback packet=16566 decision=forward strength=0.123 distance=75.3m delay=0.000s queue=0 drops=0/16566
+[RISK] score=0.083 source=fallback packet=16709 decision=forward strength=0.128 distance=74.7m delay=0.000s queue=0 drops=0/16709
+[RISK] score=0.098 source=fallback packet=16853 decision=forward strength=0.151 distance=71.7m delay=0.000s queue=0 drops=0/16853
+[RISK] score=0.130 source=fallback packet=16997 decision=forward strength=0.199 distance=65.9m delay=0.000s queue=0 drops=0/16997
+[RISK] score=0.179 source=fallback packet=17141 decision=forward strength=0.276 distance=57.6m delay=0.000s queue=0 drops=0/17141
+[RISK] score=0.240 source=fallback packet=17284 decision=forward strength=0.370 distance=48.5m delay=0.000s queue=0 drops=0/17284
+[RISK] score=0.299 source=fallback packet=17428 decision=forward strength=0.460 distance=40.4m delay=0.000s queue=0 drops=0/17428
+[RISK] score=0.343 source=fallback packet=17572 decision=forward strength=0.528 distance=34.7m delay=0.000s queue=0 drops=0/17572
+[RISK] score=0.357 source=fallback packet=17688 decision=forward strength=0.550 distance=32.9m delay=0.000s queue=0 drops=0/17688
+[RISK] score=0.349 source=fallback packet=17803 decision=forward strength=0.536 distance=34.0m delay=0.000s queue=0 drops=0/17803
+[RISK] score=0.319 source=fallback packet=17918 decision=forward strength=0.491 distance=37.8m delay=0.000s queue=0 drops=0/17918
+[RISK] score=0.267 source=fallback packet=18062 decision=forward strength=0.411 distance=44.7m delay=0.000s queue=0 drops=0/18062
+[RISK] score=0.221 source=fallback packet=18208 decision=forward strength=0.340 distance=51.2m delay=0.000s queue=0 drops=0/18208
+[RISK] score=0.198 source=fallback packet=18323 decision=forward strength=0.305 distance=54.7m delay=0.000s queue=0 drops=0/18323
+[RISK] score=0.188 source=fallback packet=18467 decision=forward strength=0.289 distance=56.3m delay=0.000s queue=0 drops=0/18467
+[RISK] score=0.188 source=fallback packet=18611 decision=forward strength=0.289 distance=56.3m delay=0.000s queue=0 drops=0/18611
+[RISK] score=0.188 source=fallback packet=18726 decision=forward strength=0.290 distance=56.2m delay=0.000s queue=0 drops=0/18726
+[RISK] score=0.189 source=fallback packet=18871 decision=forward strength=0.291 distance=56.1m delay=0.000s queue=0 drops=0/18871
+[RISK] score=0.190 source=fallback packet=19014 decision=forward strength=0.292 distance=56.0m delay=0.000s queue=0 drops=0/19014
+[RISK] score=0.190 source=fallback packet=19129 decision=forward strength=0.292 distance=56.0m delay=0.000s queue=0 drops=0/19129
+[RISK] score=0.190 source=fallback packet=19270 decision=forward strength=0.292 distance=56.0m delay=0.000s queue=0 drops=0/19270
+[RISK] score=0.190 source=fallback packet=19409 decision=forward strength=0.292 distance=55.9m delay=0.000s queue=0 drops=0/19409
+[RISK] score=0.190 source=fallback packet=19548 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/19548
+[RISK] score=0.190 source=fallback packet=19686 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/19686
+[RISK] score=0.190 source=fallback packet=19825 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/19825
+[RISK] score=0.190 source=fallback packet=19965 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/19965
+[RISK] score=0.190 source=fallback packet=20076 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/20076
+[RISK] score=0.190 source=fallback packet=20187 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/20187
+[RISK] score=0.190 source=fallback packet=20298 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/20298
+[RISK] score=0.190 source=fallback packet=20437 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/20437
+[RISK] score=0.190 source=fallback packet=20575 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/20575
+[RISK] score=0.190 source=fallback packet=20714 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/20714
+[RISK] score=0.190 source=fallback packet=20853 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/20853
+[RISK] score=0.190 source=fallback packet=20964 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/20964
+[RISK] score=0.190 source=fallback packet=21104 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/21104
+[RISK] score=0.190 source=fallback packet=21215 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/21215
+[RISK] score=0.190 source=fallback packet=21326 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/21326
+[RISK] score=0.190 source=fallback packet=21437 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/21437
+[RISK] score=0.190 source=fallback packet=21575 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/21575
+[RISK] score=0.190 source=fallback packet=21689 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/21689
+[RISK] score=0.190 source=fallback packet=21828 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/21828
+[RISK] score=0.190 source=fallback packet=21939 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/21939
+[AP] SIM Hit ground at 0.501096 m/s
+[RISK] score=0.190 source=fallback packet=22079 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/22079
+[AP] Disarming motors
+[RISK] score=0.190 source=fallback packet=22224 decision=forward strength=0.293 distance=55.9m delay=0.000s queue=0 drops=0/22224
+Vehicle disarmed
+Mission complete
