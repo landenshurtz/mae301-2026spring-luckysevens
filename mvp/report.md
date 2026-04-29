@@ -6,6 +6,8 @@
  ### Project Goal: 
  Create an AI assisted drone safety system that monitors flight data to predict if the projected flight path is safe to continue on or should be altered then notifys the pilot of a suggested course of action.
 ### MVP
+Our MVP includes an ArduPilot Drone simulator that ouputs MAVLink telemetry Data, a proxy system that allows us to simulate communication obstacles along the drone flight path, a mission control AI backend that interprets and evaluates the communication data, assigns risk scores, decides on the best course of action then recommends that action to the pilot, and a data refiner that cleans flight data for the purpose of training a linear regression model that predicts future communication interferences based off the previous few seconds of data.
+
 ## User & Use Case
 ### User:
 Commercial drone pilots: Drones are frequently used in the construction, agriculture, delivery, and real estate industries to inspect, survey, deliver packages, and capture film.  
@@ -18,7 +20,7 @@ Any situation where the drone is flying far enough away, low enough to the terra
 - delivery drones fly through dense urban areas where interference is high
 
 Example use case: 
-A drone pilot for the military is conducting a surveillance mission along a pre planned route while in route the drone sends flight and communication data to the pilot that indicates increased signal interference the data is processed and sent to an AI model which predicts whether the trends of the data indicate a major problem ahead or if it is safe to continue. The model then communicates this prediction to the pilot by recommending an action such as slow down, re route the flight path, or return to base.
+A drone pilot for the military is conducting a surveillance mission along a pre planned route while in route the drone sends flight and communication data to mission control the data is processed and sent to an AI model which predicts whether the trends of the data indicate a high interference area ahead or if it is safe to continue. The model then communicates this prediction to the pilot by recommending an action such as slow down, re route the flight path, or return to base.
 ## System Design
 
 - ArduPilot Simulation  
