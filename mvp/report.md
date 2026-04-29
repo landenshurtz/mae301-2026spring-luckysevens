@@ -8,6 +8,7 @@
 ## User & Use Case
 ### User:
 Commercial drone pilots: Drones are frequently used in the construction, agriculture, delivery, and real estate industries to inspect, survey, deliver packages, and capture film.  
+  
 Military drone pilots: More and more air force missions are being carried out by Unmanned Aeriel Vehicles for surveillance and strike missions.
 ### Use Case:
 Any situation where the drone is flying far enough away, low enough to the terrain, or through enough interference where signal loss is a major risk.
