@@ -1,17 +1,12 @@
 
 1. SIMULATION
-   Need to create a linux virtual environment and install ubuntu since ArduPilo truns on linux and not winodws (also protects your computer)
-   To run the simulation you will need to instal ceritan python libraries (cant remember off the the dome but definitly pymavlink)
+   Need to create a linux virtual environment and install ubuntu since ArduPilo truns on linux and not windows (also protects your computer)
+   To run the simulation you will need to install certain python libraries (can't remember but definitly pymavlink, check dependencies in the project)
 2. INTERFACES
-   I need to work on this still, 14550 should be simulation ans 14560 should be proxy (trafic from mission control and the sim go through), ai proxy and mission control should be on the same level wiht the interference proxy inbetween it and the sim
-4. Running a simulation
+   14550 should be simulation and 14560 should be proxy (traffic from mission control and the simulation go through), ai proxy and mission control should be on the same level wiht the interference proxy inbetween it and the sim
+3. Running a simulation
    Start ardupilot with sim vehicle(autocopter)
    wait for Ardupilot to load
    Run proxy's (AI and interference)
    Run mission control
-5. Data
-   extract/parse as whatever file you think is best (.txt seems best), with the data you think is most important for the model (time, hearatbeats, packet count etc.)
-6. Model
-   To run the model, run py ai_model.py inside the dataRefinerAndData folder (or python ai_model.py if you have it setup that way). You can also run py ai_model.py --combine-outputs in order to combine predicted dropped and returned packets. You can also run
-      py ai_model.py --exclude-columns "0, 1, 17, 18"
-   in order to exclude individual columns from the data set, useful for stopping the AI from cheating without having to massively reformat the data again.
+   It'll output in validation_run.txt
